@@ -1,4 +1,5 @@
 export * from './fs'
 export * from './log'
 export * from './parse-cargo-toml'
+export * from './spawn-cmd'
 export * from './version'

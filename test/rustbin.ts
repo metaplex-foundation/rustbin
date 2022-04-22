@@ -1,6 +1,6 @@
 import path from 'path'
 import test from 'tape'
-import { RustbinConfig, rustbinCheck } from '../src/rustbin'
+import { RustbinConfig, rustbinCheck, rustbinSync } from '../src/rustbin'
 
 const fixtures = path.join(__dirname, 'fixtures')
 const ah = path.join(fixtures, 'ah')
@@ -50,4 +50,46 @@ test('rustbin: checking anchor versions', async (t) => {
     )
   }
   t.end()
+})
+
+test('rustbin: syncing anchor versions', async (t) => {
+  const config: Omit<RustbinConfig, 'binaryName'> = {
+    rootDir: ahScriptsRoot,
+    libName: 'anchor-lang',
+    cargoToml: ahCargoToml,
+    dryRun: true,
+  }
+
+  {
+    const binaryName = 'anchor-0.19.0'
+    const { cmd } = await rustbinSync({
+      ...config,
+      binaryName,
+    })
+    t.match(
+      cmd!,
+      /cargo install anchor-0.19.0 --version '~0.24.1' --force --root .+ah\/js\/scripts/
+    )
+  }
+
+  {
+    const binaryName = 'anchor-0.24.2'
+    const { cmd } = await rustbinSync({
+      ...config,
+      binaryName,
+    })
+    t.notOk(cmd, 'no command executed to sync to anchor-0.24.2')
+  }
+
+  {
+    const binaryName = 'anchor-0.25.1'
+    const { cmd } = await rustbinSync({
+      ...config,
+      binaryName,
+    })
+    t.match(
+      cmd!,
+      /cargo install anchor-0.25.1 --version '~0.24.1' --force --root .+ah\/js\/scripts/
+    )
+  }
 })
