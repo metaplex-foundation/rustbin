@@ -14,6 +14,7 @@ export class Rustbin {
   private constructor(
     readonly rootDir: string,
     readonly binaryName: string,
+    readonly binaryCrateName: string,
     readonly binaryVersionFlag: string,
     readonly binaryVersionRx: RegExp,
     readonly libName: string,
@@ -63,7 +64,7 @@ export class Rustbin {
     const cmd = 'cargo'
     const args = [
       'install',
-      this.binaryName,
+      this.binaryCrateName,
       '--version',
       `'${libVersionRange}'`,
       '--force',
@@ -89,11 +90,13 @@ export class Rustbin {
       dryRun = false,
       cargoToml,
     } = config
+    const { binaryCrateName = binaryName } = config
     const fullRootDir = path.resolve(rootDir)
     const fullCargoToml = path.resolve(cargoToml)
     return new Rustbin(
       fullRootDir,
       binaryName,
+      binaryCrateName,
       binaryVersionFlag,
       binaryVersionRx,
       libName,
@@ -106,6 +109,7 @@ export class Rustbin {
 export type RustbinConfig = {
   rootDir: string
   binaryName: string
+  binaryCrateName?: string
   binaryVersionFlag?: string
   binaryVersionRx?: RegExp
   libName: string
