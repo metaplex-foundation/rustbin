@@ -2,6 +2,7 @@ import path from 'path'
 import {
   binarySatisfies,
   ConfirmInstall,
+  getBinaryVersion,
   logDebug,
   logInfo,
   parseCargoToml,
@@ -11,6 +12,8 @@ import {
 import table from 'text-table'
 
 export * from './utils/confirm'
+
+const DEFAULT_BINARY_VERSION_FLAG = '--version'
 
 /** @private */
 class Rustbin {
@@ -90,7 +93,7 @@ class Rustbin {
       binaryName,
       libName,
       binaryVersionRx = versionRx,
-      binaryVersionFlag = '--version',
+      binaryVersionFlag = DEFAULT_BINARY_VERSION_FLAG,
       dryRun = false,
       cargoToml,
     } = config
@@ -165,6 +168,25 @@ export type RustbinConfig = {
   libName: string
   cargoToml: string
   dryRun?: boolean
+}
+
+/**
+ * Queries version of the installed binary.
+ *
+ * @returns version of the installed binary or `null` if the binary was
+ * not found or the version string could not be parsed
+ */
+export async function rustbinVersion(
+  fullPathToBinary: string,
+  binaryVersionFlag: string = DEFAULT_BINARY_VERSION_FLAG,
+  binaryVersionRx: RegExp = versionRx
+) {
+  const { binVersion } = await getBinaryVersion(
+    fullPathToBinary,
+    binaryVersionFlag,
+    binaryVersionRx
+  )
+  return binVersion
 }
 
 /**
