@@ -39,7 +39,7 @@ console.log(`${fullPathToBinary} installed via ${cmd}`);
 
 ## API
 
-Please consult the full API [here](https://metaplex-foundation.gihub.io/rustbin/docs/).
+Please consult the full API [here](https://metaplex-foundation.github.io/rustbin/docs/).
 
 ## LICENSE
 
