@@ -68,7 +68,7 @@ test('rustbin: syncing anchor versions', async (t) => {
     })
     t.match(
       cmd!,
-      /cargo install anchor-0.19.0 --version '~0.24.1' --force --root .+ah\/js\/scripts/
+      /cargo install anchor-0.19.0 --version ~0.24.1 --force --root .+ah\/js\/scripts/
     )
   }
 
@@ -89,7 +89,7 @@ test('rustbin: syncing anchor versions', async (t) => {
     })
     t.match(
       cmd!,
-      /cargo install anchor-0.25.1 --version '~0.24.1' --force --root .+ah\/js\/scripts/
+      /cargo install anchor-0.25.1 --version ~0.24.1 --force --root .+ah\/js\/scripts/
     )
   }
 })
