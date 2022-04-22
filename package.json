@@ -1,6 +1,6 @@
 {
   "name": "@metaplex-foundation/rustbin",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Synchronizes a Rust binary version with the related Rust crate",
   "main": "dist/src/rustbin.js",
   "types": "dist/src/rustbin.d.ts",
