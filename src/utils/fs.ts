@@ -1,5 +1,6 @@
 import { promises as fs } from 'fs'
 
+/** @private */
 export async function canAccess(p: string) {
   try {
     await fs.access(p)
@@ -8,6 +9,8 @@ export async function canAccess(p: string) {
     return false
   }
 }
+
+/** @private */
 export async function ensureDir(dir: string) {
   if (!(await canAccess(dir))) {
     await fs.mkdir(dir, { recursive: true })

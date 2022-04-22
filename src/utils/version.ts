@@ -3,9 +3,11 @@ import satisfies from 'semver/functions/satisfies'
 import { canAccess } from './fs'
 import { logDebug, logError, logInfo } from './log'
 
+/** @private */
 export const versionRx =
   /([0-9]+\.[0-9]+\.[0-9]+)(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+)?/
 
+/** @private */
 export async function binarySatisfies(
   fullPathToBinary: string,
   binaryVersionFlag: string,

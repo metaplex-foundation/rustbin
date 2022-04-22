@@ -1,5 +1,6 @@
 import { spawn, SpawnOptions } from 'child_process'
 
+/** @private */
 export function spawnCmd(
   cmd: string,
   args: string[],

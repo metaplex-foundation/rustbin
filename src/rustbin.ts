@@ -10,9 +10,10 @@ import {
 } from './utils'
 import table from 'text-table'
 
-export { confirmAutoMessageConsole } from './utils'
+export * from './utils/confirm'
 
-export class Rustbin {
+/** @private */
+class Rustbin {
   readonly fullPathToBinary: string
   private constructor(
     readonly rootDir: string,
@@ -27,7 +28,7 @@ export class Rustbin {
     this.fullPathToBinary = path.join(rootDir, 'bin', binaryName)
   }
 
-  async check() {
+  async check(): Promise<RustbinCheckReturn> {
     const libVersion = await this.getVersionInToml()
     const { binVersion, satisfies } = await binarySatisfies(
       this.fullPathToBinary,
@@ -109,6 +110,47 @@ export class Rustbin {
   }
 }
 
+/**
+ * Returned by {@link rustbinCheck}
+ *
+ * @property satisfies - true if the binary version satisfies the library
+ * version range
+ * @property libVersion - the library version range
+ * @property binVersion - the binary version (if it is not defined then the
+ * binary was either not found or the version output could not be parsed)
+ */
+export type RustbinCheckReturn = {
+  satisfies: boolean
+  libVersion: string
+  binVersion?: string
+}
+
+/**
+ * Returned by {@link rustbinMatch}
+ *
+ * @property cmd - the command to install the binary (empty if no install is
+ * needed)
+ * @property fullPathToBinary - the full path to the installed binary
+ */
+export type RustbinMatchReturn = {
+  cmd?: string
+  fullPathToBinary: string
+}
+
+/**
+ * Configures how rustbin checks/matches the installed binary
+ * with the installed library.
+ *
+ * @property rootDir - the directory where `cargo install` will place the install metadata files and the binary below
+ * `./bin`
+ * @property binaryName - the name of the binary executable to check/install
+ * @property binaryCrateName - the name of the binary on crates.io
+ * @property binaryVersionFlag - the flag to pass to the binary to have it print the version string
+ * @property binaryVersionRx - a regex to extract the version from the binary version output string
+ * @property libName - the name of the matching installed library
+ * @property cargoToml - the path to the Cargo.toml file in which the version of the library is defined
+ * @property dryRun - if true, the binary will not be installed even if it is necessary
+ */
 export type RustbinConfig = {
   rootDir: string
   binaryName: string
@@ -120,15 +162,31 @@ export type RustbinConfig = {
   dryRun?: boolean
 }
 
-export function rustbinCheck(config: RustbinConfig) {
+/**
+ * Checks if the installed binary matches the installed library.
+ *
+ * @returns result of check including if the binary version satisfies the
+ * library version range
+ */
+export function rustbinCheck(
+  config: RustbinConfig
+): Promise<RustbinCheckReturn> {
   const rustbin = Rustbin.fromConfig(config)
   return rustbin.check()
 }
 
+/**
+ * Checks if the installed binary matches the installed library.
+ * If not it attempts to install the latest binary matching the library version
+ * range via `cargo install`.
+ *
+ * @returns result including the `cmd` used to install the binary (if it was
+ * necessary) and the full path to said binary
+ */
 export async function rustbinMatch(
   config: RustbinConfig,
   confirmInstall: ConfirmInstall = () => Promise.resolve(true)
-) {
+): Promise<RustbinMatchReturn> {
   const rustbin = Rustbin.fromConfig(config)
   const { satisfies, libVersion, binVersion } = await rustbin.check()
   if (
