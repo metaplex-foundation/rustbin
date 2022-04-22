@@ -37,5 +37,5 @@ export function confirmAutoMessageConsole({
   console.error(
     `Will install version matching "${libName}: '${libVersion}'" to ${fullPathToBinary}`
   )
-  Promise.resolve(true)
+  return Promise.resolve(true)
 }
