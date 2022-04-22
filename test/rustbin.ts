@@ -1,6 +1,6 @@
 import path from 'path'
 import test from 'tape'
-import { RustbinConfig, rustbinCheck, rustbinSync } from '../src/rustbin'
+import { RustbinConfig, rustbinCheck, rustbinMatch } from '../src/rustbin'
 
 const fixtures = path.join(__dirname, 'fixtures')
 const ah = path.join(fixtures, 'ah')
@@ -62,7 +62,7 @@ test('rustbin: syncing anchor versions', async (t) => {
 
   {
     const binaryName = 'anchor-0.19.0'
-    const { cmd } = await rustbinSync({
+    const { cmd } = await rustbinMatch({
       ...config,
       binaryName,
     })
@@ -74,7 +74,7 @@ test('rustbin: syncing anchor versions', async (t) => {
 
   {
     const binaryName = 'anchor-0.24.2'
-    const { cmd } = await rustbinSync({
+    const { cmd } = await rustbinMatch({
       ...config,
       binaryName,
     })
@@ -83,7 +83,7 @@ test('rustbin: syncing anchor versions', async (t) => {
 
   {
     const binaryName = 'anchor-0.25.1'
-    const { cmd } = await rustbinSync({
+    const { cmd } = await rustbinMatch({
       ...config,
       binaryName,
     })

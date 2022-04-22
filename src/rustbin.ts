@@ -1,6 +1,7 @@
 import path from 'path'
 import {
   binarySatisfies,
+  ConfirmInstall,
   logDebug,
   logInfo,
   parseCargoToml,
@@ -8,6 +9,8 @@ import {
   versionRx,
 } from './utils'
 import table from 'text-table'
+
+export { confirmAutoMessageConsole } from './utils'
 
 export class Rustbin {
   readonly fullPathToBinary: string
@@ -26,7 +29,7 @@ export class Rustbin {
 
   async check() {
     const libVersion = await this.getVersionInToml()
-    const { binVersion, satisfies } = binarySatisfies(
+    const { binVersion, satisfies } = await binarySatisfies(
       this.fullPathToBinary,
       this.binaryVersionFlag,
       this.binaryVersionRx,
@@ -36,7 +39,7 @@ export class Rustbin {
       ['Type', 'Name', 'Version'],
       ['----', '----', '-------'],
       ['lib', this.libName, libVersion],
-      ['bin', this.binaryName, binVersion],
+      ['bin', this.binaryName, binVersion ?? '<unknown'],
     ]
     logInfo(table(rows))
 
@@ -66,7 +69,7 @@ export class Rustbin {
       'install',
       this.binaryCrateName,
       '--version',
-      `'${libVersionRange}'`,
+      libVersionRange,
       '--force',
       '--root',
       this.rootDir,
@@ -122,10 +125,24 @@ export function rustbinCheck(config: RustbinConfig) {
   return rustbin.check()
 }
 
-export async function rustbinSync(config: RustbinConfig) {
+export async function rustbinMatch(
+  config: RustbinConfig,
+  confirmInstall: ConfirmInstall = () => Promise.resolve(true)
+) {
   const rustbin = Rustbin.fromConfig(config)
-  const { satisfies, libVersion } = await rustbin.check()
-  if (satisfies) return { fullPathToBinary: rustbin.fullPathToBinary }
+  const { satisfies, libVersion, binVersion } = await rustbin.check()
+  if (
+    satisfies ||
+    !(await confirmInstall({
+      binaryName: rustbin.binaryName,
+      libName: rustbin.libName,
+      libVersion,
+      binVersion,
+      fullPathToBinary: rustbin.fullPathToBinary,
+    }))
+  ) {
+    return { fullPathToBinary: rustbin.fullPathToBinary }
+  }
 
   logInfo(`Installing ${libVersion} compatible version of ${config.binaryName}`)
   const cmd = await rustbin.installMatchinBin(libVersion)

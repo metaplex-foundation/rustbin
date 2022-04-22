@@ -1,3 +1,4 @@
+export * from './confirm'
 export * from './fs'
 export * from './log'
 export * from './parse-cargo-toml'
