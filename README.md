@@ -1,4 +1,4 @@
-# rustbin 
+# rustbin [![Build Lint and Test Rustbin](https://github.com/metaplex-foundation/rustbin/actions/workflows/rustbin.yml/badge.svg)](https://github.com/metaplex-foundation/rustbin/actions/workflows/rustbin.yml)
 
 Synchronizes a Rust binary version with the related Rust crate.
 
