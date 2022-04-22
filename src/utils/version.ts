@@ -25,7 +25,7 @@ export async function getBinaryVersion(
 
   logDebug(`versionCmd: ${versionCmd} ->\n${output}`)
   const match = output.match(binaryVersionRx)
-  return { binVersion: match == null ? null : match[0], output }
+  return { binVersion: match == null ? undefined : match[0], output }
 }
 
 /** @private */

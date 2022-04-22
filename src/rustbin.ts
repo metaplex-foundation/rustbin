@@ -173,7 +173,7 @@ export type RustbinConfig = {
 /**
  * Queries version of the installed binary.
  *
- * @returns version of the installed binary or `null` if the binary was
+ * @returns version of the installed binary or `undefined` if the binary was
  * not found or the version string could not be parsed
  */
 export async function rustbinVersion(
@@ -208,7 +208,7 @@ export function rustbinCheck(
  * range via `cargo install`.
  *
  * @returns result including the `cmd` used to install the binary (if it was
- * necessary) and the full path to said binary
+ * necessary), the full path to said binary and the installed version of it
  */
 export async function rustbinMatch(
   config: RustbinConfig,
@@ -235,10 +235,11 @@ export async function rustbinMatch(
 
   logInfo(`Installing ${libVersion} compatible version of ${config.binaryName}`)
   const cmd = await rustbin.installMatchinBin(libVersion)
+  const installedBinVersion = await rustbinVersion(rustbin.fullPathToBinary)
   return {
     cmd,
     libVersion,
-    binVersion,
+    binVersion: installedBinVersion,
     fullPathToBinary: rustbin.fullPathToBinary,
   }
 }
