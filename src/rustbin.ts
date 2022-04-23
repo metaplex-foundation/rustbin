@@ -86,28 +86,50 @@ class Rustbin {
       try {
         await spawnCmd(cmd, args)
       } catch (err: any) {
-        // NOTE: this fallback logic isn't tested as it would be a lot of setup to simulate
-        if (this.versionRangeFallback == null) {
-          throw err
-        } else {
-          const args = installArgs(
-            this.binaryCrateName,
-            this.versionRangeFallback,
-            this.locked,
-            this.rootDir
-          )
-          const fullCmd = `${cmd} ${args.join(' ')}`
-          logError(err.message)
-          logError(
-            `Install for compatible version failed, trying fallback: '${this.versionRangeFallback}'`
-          )
-          logInfo(fullCmd)
-          await spawnCmd(cmd, args)
-        }
+        const backupCmd = await this.handleFailedInstall(cmd, err)
+        return backupCmd ?? fullCmd
       }
     }
 
     return fullCmd
+  }
+
+  async handleFailedInstall(cmd: string, err: any) {
+    if (this.versionRangeFallback == null) {
+      throw err
+    } else {
+      // NOTE: this fallback logic isn't tested as it would be a lot of setup to simulate
+      logError(err.message)
+
+      // 1. see if the currently installed binary matches the fallback
+      const { satisfies } = await binarySatisfies(
+        this.fullPathToBinary,
+        this.binaryVersionFlag,
+        this.binaryVersionRx,
+        this.versionRangeFallback
+      )
+      if (satisfies) {
+        logError(
+          `Install for compatible version failed, using already installed fallback: '${this.versionRangeFallback}'`
+        )
+        return
+      }
+
+      // 2. if not, install it
+      const args = installArgs(
+        this.binaryCrateName,
+        this.versionRangeFallback,
+        this.locked,
+        this.rootDir
+      )
+      const fullCmd = `${cmd} ${args.join(' ')}`
+      logError(
+        `Install for compatible version failed, trying fallback: '${this.versionRangeFallback}'`
+      )
+      logInfo(fullCmd)
+      await spawnCmd(cmd, args)
+      return fullCmd
+    }
   }
 
   static fromConfig(config: RustbinConfig) {
