@@ -3,7 +3,9 @@ import {
   binarySatisfies,
   ConfirmInstall,
   getBinaryVersion,
+  installArgs,
   logDebug,
+  logError,
   logInfo,
   parseCargoToml,
   spawnCmd,
@@ -27,9 +29,11 @@ class Rustbin {
     readonly libName: string,
     readonly cargoToml: string,
     readonly dryRun: boolean,
-    readonly locked: boolean
+    readonly locked: boolean,
+    readonly versionRangeFallback?: string
   ) {
     this.fullPathToBinary = path.join(rootDir, 'bin', binaryName)
+    logDebug(this)
   }
 
   async check(): Promise<RustbinCheckReturn> {
@@ -70,20 +74,37 @@ class Rustbin {
   async installMatchinBin(libVersionRange: string) {
     // cargo install anchor-cli --version 0.24.2 --force --root `pwd`/scripts
     const cmd = 'cargo'
-    const args = [
-      'install',
+    const args = installArgs(
       this.binaryCrateName,
-      '--version',
       libVersionRange,
-      ...(this.locked ? ['--locked'] : []),
-      '--force',
-      '--root',
-      this.rootDir,
-    ]
+      this.locked,
+      this.rootDir
+    )
     const fullCmd = `${cmd} ${args.join(' ')}`
     logInfo(fullCmd)
     if (!this.dryRun) {
-      await spawnCmd(cmd, args)
+      try {
+        await spawnCmd(cmd, args)
+      } catch (err: any) {
+        // NOTE: this fallback logic isn't tested as it would be a lot of setup to simulate
+        if (this.versionRangeFallback == null) {
+          throw err
+        } else {
+          const args = installArgs(
+            this.binaryCrateName,
+            this.versionRangeFallback,
+            this.locked,
+            this.rootDir
+          )
+          const fullCmd = `${cmd} ${args.join(' ')}`
+          logError(err.message)
+          logError(
+            `Install for compatible version failed, trying fallback: '${this.versionRangeFallback}'`
+          )
+          logInfo(fullCmd)
+          await spawnCmd(cmd, args)
+        }
+      }
     }
 
     return fullCmd
@@ -99,6 +120,7 @@ class Rustbin {
       dryRun = false,
       locked = false,
       cargoToml,
+      versionRangeFallback,
     } = config
     const { binaryCrateName = binaryName } = config
     const fullRootDir = path.resolve(rootDir)
@@ -112,7 +134,8 @@ class Rustbin {
       libName,
       fullCargoToml,
       dryRun,
-      locked
+      locked,
+      versionRangeFallback
     )
   }
 }
@@ -161,7 +184,10 @@ export type RustbinMatchReturn = {
  * @property binaryVersionRx - a regex to extract the version from the binary version output string
  * @property libName - the name of the matching installed library
  * @property cargoToml - the path to the Cargo.toml file in which the version of the library is defined
- * @property locked - if `true` a `--locked` flat is passed to `cargo install`
+ * @property versionRangeFallback - the binary version/range to use if the one
+ * matching the lib version is not installable. This should be used with care
+ * as this could result in an incompatible version to be installed.
+ * @property locked - if `true` a `--locked` flag is passed to `cargo install`
  * @property dryRun - if true, the binary will not be installed even if it is necessary
  */
 export type RustbinConfig = {
@@ -171,6 +197,7 @@ export type RustbinConfig = {
   binaryVersionFlag?: string
   binaryVersionRx?: RegExp
   libName: string
+  versionRangeFallback?: string
   cargoToml: string
   locked?: boolean
   dryRun?: boolean
