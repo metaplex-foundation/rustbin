@@ -57,3 +57,22 @@ export async function binarySatisfies(
     satisfies: satisfies(binVersion, libVersionRange),
   }
 }
+
+/** @private */
+export function installArgs(
+  binaryCrateName: string,
+  libVersionRange: string,
+  locked: boolean,
+  rootDir: string
+) {
+  return [
+    'install',
+    binaryCrateName,
+    '--version',
+    libVersionRange,
+    ...(locked ? ['--locked'] : []),
+    '--force',
+    '--root',
+    rootDir,
+  ]
+}
