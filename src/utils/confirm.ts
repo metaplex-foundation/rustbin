@@ -8,6 +8,7 @@ export type ConfirmInstallArgs = {
   binVersion?: string
   fullPathToBinary: string
 }
+
 /**
  * Function that can be passed to {@link rustbinMatch} to confirm the install
  * step.

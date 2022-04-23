@@ -26,7 +26,8 @@ class Rustbin {
     readonly binaryVersionRx: RegExp,
     readonly libName: string,
     readonly cargoToml: string,
-    readonly dryRun: boolean
+    readonly dryRun: boolean,
+    readonly locked: boolean
   ) {
     this.fullPathToBinary = path.join(rootDir, 'bin', binaryName)
   }
@@ -74,6 +75,7 @@ class Rustbin {
       this.binaryCrateName,
       '--version',
       libVersionRange,
+      ...(this.locked ? ['--locked'] : []),
       '--force',
       '--root',
       this.rootDir,
@@ -95,6 +97,7 @@ class Rustbin {
       binaryVersionRx = versionRx,
       binaryVersionFlag = DEFAULT_BINARY_VERSION_FLAG,
       dryRun = false,
+      locked = false,
       cargoToml,
     } = config
     const { binaryCrateName = binaryName } = config
@@ -108,7 +111,8 @@ class Rustbin {
       binaryVersionRx,
       libName,
       fullCargoToml,
-      dryRun
+      dryRun,
+      locked
     )
   }
 }
@@ -157,6 +161,7 @@ export type RustbinMatchReturn = {
  * @property binaryVersionRx - a regex to extract the version from the binary version output string
  * @property libName - the name of the matching installed library
  * @property cargoToml - the path to the Cargo.toml file in which the version of the library is defined
+ * @property locked - if `true` a `--locked` flat is passed to `cargo install`
  * @property dryRun - if true, the binary will not be installed even if it is necessary
  */
 export type RustbinConfig = {
@@ -167,6 +172,7 @@ export type RustbinConfig = {
   binaryVersionRx?: RegExp
   libName: string
   cargoToml: string
+  locked?: boolean
   dryRun?: boolean
 }
 

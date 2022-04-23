@@ -93,3 +93,25 @@ test('rustbin: syncing anchor versions', async (t) => {
     )
   }
 })
+
+test('rustbin: syncing anchor version --locked', async (t) => {
+  const config: Omit<RustbinConfig, 'binaryName'> = {
+    rootDir: ahScriptsRoot,
+    libName: 'anchor-lang',
+    cargoToml: ahCargoToml,
+    dryRun: true,
+    locked: true,
+  }
+
+  {
+    const binaryName = 'anchor-0.19.0'
+    const { cmd } = await rustbinMatch({
+      ...config,
+      binaryName,
+    })
+    t.match(
+      cmd!,
+      /cargo install anchor-0.19.0 --version ~0.24.1 --locked --force --root .+ah\/js\/scripts/
+    )
+  }
+})
