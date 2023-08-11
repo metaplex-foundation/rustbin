@@ -2,7 +2,7 @@ import { spawn, SpawnOptions } from 'child_process'
 import { logDebug } from './log'
 
 // error: could not find `anchor-cli` in registry `crates-io` with version `~0.22`
-const installNotFoundRx = /error\: could not find.+in registry/
+const installNotFoundRx = /error: could not find.+in registry/
 
 /** @private */
 export function spawnCmd(
