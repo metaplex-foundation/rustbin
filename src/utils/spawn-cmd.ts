@@ -12,14 +12,6 @@ export function spawnCmd(
   return new Promise<void>((resolve, reject) => {
     let rejected = false
     const child = spawn(cmd, args, options)
-    child
-      .on('error', (err) => {
-        rejected = true
-        reject(err)
-      })
-      .on('exit', () => {
-        if (!rejected) resolve()
-      })
 
     child.stdout?.on('data', (buf) => process.stdout.write(buf))
     child.stderr?.on('data', (buf) => {
@@ -32,5 +24,14 @@ export function spawnCmd(
         process.stderr.write(buf)
       }
     })
+
+    child
+      .on('error', (err) => {
+        rejected = true
+        reject(err)
+      })
+      .on('exit', () => {
+        if (!rejected) resolve()
+      })
   })
 }
