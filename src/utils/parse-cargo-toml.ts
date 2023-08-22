@@ -1,6 +1,6 @@
 import { promises as fs } from 'fs'
 import { logError } from './log'
-import { parse } from 'toml'
+import { parse } from '@iarna/toml'
 
 /** @private */
 export type CargoToml = {
@@ -17,7 +17,7 @@ export async function parseCargoToml(fullPath: string) {
     throw err
   }
   try {
-    const parsed: CargoToml = parse(toml)
+    const parsed = parse(toml) as CargoToml
     return { parsed, toml }
   } catch (err) {
     logError('Failed to parse Cargo.toml:\n%s\n%s', toml, err)
