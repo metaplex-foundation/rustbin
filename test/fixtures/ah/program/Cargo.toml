@@ -1,4 +1,6 @@
-[workspace]
+[workspace.dependencies]
+num-traits = "0.2"
+
 [package]
 name = "mpl-auction-house"
 version = "1.1.4"
@@ -23,3 +25,5 @@ default = []
 solana-program = "~1.9.15"
 anchor-lang = "~0.24.1"
 anchor-spl = "~0.24.1"
+
+num-traits.workspace = true
